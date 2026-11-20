@@ -1,0 +1,330 @@
+{
+ "fps": 25,
+ "total": 65.44,
+ "edl": [
+  {
+   "id": "S1",
+   "kind": "a",
+   "src": [
+    0.96,
+    8.6
+   ],
+   "zoom": [
+    1.0,
+    1.07
+   ],
+   "cx": 975,
+   "cy": 520,
+   "out": [
+    0.0,
+    7.64
+   ]
+  },
+  {
+   "id": "TITLE",
+   "kind": "ins",
+   "dur": 3.4,
+   "out": [
+    7.64,
+    11.04
+   ]
+  },
+  {
+   "id": "WEB1",
+   "kind": "ins",
+   "dur": 4.2,
+   "out": [
+    11.04,
+    15.24
+   ]
+  },
+  {
+   "id": "S2",
+   "kind": "a",
+   "src": [
+    9.12,
+    19.8
+   ],
+   "zoom": [
+    1.16,
+    1.21
+   ],
+   "cx": 985,
+   "cy": 470,
+   "out": [
+    15.24,
+    25.92
+   ]
+  },
+  {
+   "id": "S3",
+   "kind": "a",
+   "src": [
+    20.48,
+    31.56
+   ],
+   "zoom": [
+    1.0,
+    1.03
+   ],
+   "cx": 975,
+   "cy": 520,
+   "out": [
+    25.92,
+    37.0
+   ]
+  },
+  {
+   "id": "S4",
+   "kind": "a",
+   "src": [
+    31.84,
+    36.8
+   ],
+   "zoom": [
+    1.0,
+    1.0
+   ],
+   "cx": 975,
+   "cy": 520,
+   "out": [
+    37.0,
+    41.96
+   ]
+  },
+  {
+   "id": "S5",
+   "kind": "a",
+   "src": [
+    37.12,
+    42.4
+   ],
+   "zoom": [
+    1.3,
+    1.34
+   ],
+   "cx": 760,
+   "cy": 420,
+   "out": [
+    41.96,
+    47.24
+   ]
+  },
+  {
+   "id": "S6",
+   "kind": "a",
+   "src": [
+    46.92,
+    53.4
+   ],
+   "zoom": [
+    1.18,
+    1.2
+   ],
+   "cx": 1120,
+   "cy": 500,
+   "out": [
+    47.24,
+    53.72
+   ]
+  },
+  {
+   "id": "S7",
+   "kind": "a",
+   "src": [
+    53.68,
+    57.0
+   ],
+   "zoom": [
+    1.36,
+    1.4
+   ],
+   "cx": 985,
+   "cy": 410,
+   "out": [
+    53.72,
+    57.04
+   ]
+  },
+  {
+   "id": "END",
+   "kind": "ins",
+   "dur": 8.4,
+   "out": [
+    57.04,
+    65.44
+   ]
+  }
+ ],
+ "subs": [
+  {
+   "t0": 0.08,
+   "t1": 3.36,
+   "ms": "Google nak labur 15 bilion USD di Malaysia.",
+   "en": "Google wants to invest 15 billion USD in Malaysia."
+  },
+  {
+   "t0": 3.4,
+   "t1": 4.88,
+   "ms": "Bagus, ya.",
+   "en": "That's good."
+  },
+  {
+   "t0": 4.92,
+   "t1": 7.6,
+   "ms": "Tapi kerja untuk rakyat kita, ada tak?",
+   "en": "But are there jobs for our people?"
+  },
+  {
+   "t0": 15.32,
+   "t1": 18.12,
+   "ms": "Sebab data center ini bukan sekadar bangunan penuh komputer.",
+   "en": "Because a data centre isn't just a building full of computers."
+  },
+  {
+   "t0": 18.12,
+   "t1": 20.44,
+   "ms": "Nak bina, nak jaga, nak urus \u2014",
+   "en": "Building it, maintaining it, managing it \u2014"
+  },
+  {
+   "t0": 20.44,
+   "t1": 22.32,
+   "ms": "semuanya perlukan tenaga kerja.",
+   "en": "all of it needs a workforce."
+  },
+  {
+   "t0": 22.48,
+   "t1": 25.88,
+   "ms": "Jurutera, juruteknik, kontraktor, orang logistik.",
+   "en": "Engineers, technicians, contractors, logistics people."
+  },
+  {
+   "t0": 26.04,
+   "t1": 27.68,
+   "ms": "Google jangka pelaburan terbaru ini",
+   "en": "Google expects this latest investment"
+  },
+  {
+   "t0": 27.68,
+   "t1": 32.44,
+   "ms": "akan menyokong lebih 37 ribu pekerjaan setahun semasa pembinaan.",
+   "en": "to support more than 37,000 jobs a year during construction."
+  },
+  {
+   "t0": 33.04,
+   "t1": 36.72,
+   "ms": "Bila beroperasi nanti, lebih 9 ribu pekerjaan setahun.",
+   "en": "Once operational, more than 9,000 jobs a year."
+  },
+  {
+   "t0": 37.12,
+   "t1": 39.84,
+   "ms": "Ini kerja yang diwujudkan oleh ekosistem Google,",
+   "en": "These are jobs created by Google's ecosystem \u2014"
+  },
+  {
+   "t0": 40.48,
+   "t1": 41.92,
+   "ms": "bukan semuanya dengan Google.",
+   "en": "not all of them with Google itself."
+  },
+  {
+   "t0": 42.04,
+   "t1": 43.76,
+   "ms": "Bagi saya, ukuran kejayaan",
+   "en": "For me, the measure of success"
+  },
+  {
+   "t0": 43.8,
+   "t1": 47.24,
+   "ms": "bukan berapa bilion pelaburan diumumkan,",
+   "en": "isn't how many billions in investment are announced,"
+  },
+  {
+   "t0": 47.32,
+   "t1": 50.72,
+   "ms": "tapi berapa ramai rakyat Malaysia dapat kerja yang bagus,",
+   "en": "but how many Malaysians get good jobs,"
+  },
+  {
+   "t0": 51.04,
+   "t1": 53.6,
+   "ms": "dan berapa banyak syarikat tempatan dapat peluang.",
+   "en": "and how many local companies get opportunities."
+  },
+  {
+   "t0": 53.8,
+   "t1": 56.24,
+   "ms": "Itu yang kita kena pastikan.",
+   "en": "That is what we must make sure of."
+  }
+ ],
+ "ev": {
+  "hook": {
+   "t0": 0.64,
+   "t1": 3.3,
+   "count_at": 1.12
+  },
+  "question": {
+   "t0": 5.04,
+   "t1": 7.64
+  },
+  "title": {
+   "t0": 7.64,
+   "t1": 11.04
+  },
+  "web1": {
+   "t0": 11.04,
+   "t1": 15.24
+  },
+  "map": {
+   "t0": 18.08,
+   "t1": 22.32,
+   "bina": 18.56,
+   "jaga": 19.32,
+   "urus": 20.04,
+   "tenaga": 20.52
+  },
+  "roles": {
+   "t0": 22.4,
+   "t1": 25.92,
+   "k": [
+    22.56,
+    23.24,
+    24.16,
+    25.16
+   ]
+  },
+  "jobs": {
+   "t0": 27.56,
+   "t1": 37.0,
+   "n37": 28.48,
+   "pembinaan": 31.4,
+   "n9": 34.24
+  },
+  "web2": {
+   "t0": 37.0,
+   "t1": 41.96,
+   "hl": 38.56
+  },
+  "quote": {
+   "t0": 42.44,
+   "t1": 47.24,
+   "bukan": 43.8
+  },
+  "dci": {
+   "t0": 47.72,
+   "t1": 50.88
+  },
+  "suppliers": {
+   "t0": 51.08,
+   "t1": 53.72
+  },
+  "end": {
+   "t0": 57.04,
+   "t1": 65.44,
+   "sources": 61.04
+  }
+ }
+}

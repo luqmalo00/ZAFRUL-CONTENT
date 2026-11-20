@@ -1,0 +1,166 @@
+{
+ "headline": {
+  "clip": {
+   "x": 0,
+   "y": 0,
+   "w": 1280,
+   "h": 660
+  },
+  "phrases": {
+   "US$15 Billion Malaysia Investment": [
+    {
+     "x": 871.140625,
+     "y": 337.4375,
+     "w": 281.796875,
+     "h": 60
+    },
+    {
+     "x": 409.140625,
+     "y": 393.65625,
+     "w": 461.703125,
+     "h": 60
+    }
+   ],
+   "November 4, 2026": [
+    {
+     "x": 574.78125,
+     "y": 466.875,
+     "w": 130.421875,
+     "h": 20
+    }
+   ]
+  }
+ },
+ "jobs": {
+  "clip": {
+   "x": 179,
+   "y": 2151.890625,
+   "w": 922,
+   "h": 324.703125
+  },
+  "phrases": {
+   "support more than 37,000 local jobs per year": [
+    {
+     "x": 417.125,
+     "y": 59.078125,
+     "w": 360.890625,
+     "h": 22
+    }
+   ],
+   "more than 9,000 local jobs per year": [
+    {
+     "x": 484.15625,
+     "y": 159.3125,
+     "w": 284.671875,
+     "h": 22
+    }
+   ],
+   "wages averaging 45% above the national median": [
+    {
+     "x": 815.78125,
+     "y": 159.3125,
+     "w": 52.8125,
+     "h": 22
+    },
+    {
+     "x": 40,
+     "y": 187.390625,
+     "w": 336.46875,
+     "h": 22
+    }
+   ],
+   "contractor roles with local suppliers and workers at the shops, restaurants, and amenities patronized by these employees and their families": [
+    {
+     "x": 354.734375,
+     "y": 243.546875,
+     "w": 497.859375,
+     "h": 22
+    },
+    {
+     "x": 40,
+     "y": 271.625,
+     "w": 611.0625,
+     "h": 22
+    }
+   ],
+   "data center technicians, mechanical engineers, electrical engineers, logistics operations managers": [
+    {
+     "x": 842.703125,
+     "y": 187.390625,
+     "w": 36.203125,
+     "h": 22
+    },
+    {
+     "x": 40,
+     "y": 215.46875,
+     "w": 748.1875,
+     "h": 22
+    }
+   ]
+  }
+ },
+ "suppliers": {
+  "clip": {
+   "x": 179,
+   "y": 1967.421875,
+   "w": 922,
+   "h": 224.46875
+  },
+  "phrases": {
+   "domestic supply chain of more than 80 Malaysian entities": [
+    {
+     "x": 242.6875,
+     "y": 31,
+     "w": 461.171875,
+     "h": 22
+    }
+   ],
+   "construction and civil engineering; network infrastructure; power and cooling system components; and services like logistics": [
+    {
+     "x": 441.671875,
+     "y": 59.078125,
+     "w": 347.453125,
+     "h": 22
+    },
+    {
+     "x": 40,
+     "y": 87.15625,
+     "w": 647.875,
+     "h": 22
+    }
+   ]
+  }
+ },
+ "dci": {
+  "clip": {
+   "x": 219,
+   "y": 3272.78125,
+   "w": 882,
+   "h": 224.46875
+  },
+  "phrases": {
+   "Data Center Institutes (DCIs)": [
+    {
+     "x": 40,
+     "y": 31,
+     "w": 248.078125,
+     "h": 22
+    }
+   ],
+   "train and place local Technical and Vocational Education and Training (TVET) jobseekers": [
+    {
+     "x": 513.390625,
+     "y": 59.078125,
+     "w": 274.390625,
+     "h": 22
+    },
+    {
+     "x": 40,
+     "y": 87.15625,
+     "w": 419.34375,
+     "h": 22
+    }
+   ]
+  }
+ }
+}

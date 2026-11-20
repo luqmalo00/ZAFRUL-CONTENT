@@ -1,0 +1,408 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=block" rel="stylesheet">
+<style>
+:root{
+  --bg:#090D14; --bg2:#0E1420; --panel:rgba(14,20,32,.78); --line:rgba(255,255,255,.10);
+  --ink:#F3F5F7; --muted:#A3ACB9; --dim:#6B7585;
+  --blue:#4285F4; --red:#EA4335; --yellow:#FBBC05; --green:#34A853;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;background:transparent;overflow:hidden}
+body{font-family:Inter,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.abs{position:absolute}
+.layer{position:absolute;inset:0;opacity:0}
+.disp{font-family:"Inter Tight",Inter,sans-serif;letter-spacing:-.02em}
+.serif{font-family:"Instrument Serif",serif}
+.mono{font-family:"JetBrains Mono",monospace}
+.eyebrow{font:600 22px/1 Inter;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.gbar{display:flex;gap:0;height:6px;width:120px}
+.gbar i{flex:1;display:block}
+.gbar i:nth-child(1){background:var(--blue)}.gbar i:nth-child(2){background:var(--red)}
+.gbar i:nth-child(3){background:var(--yellow)}.gbar i:nth-child(4){background:var(--green)}
+.src{font:500 17px/1.3 Inter;color:var(--muted);display:flex;align-items:center;gap:10px}
+.src b{font-weight:600;color:var(--ink)}
+.src .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex:none}
+.fs{background:radial-gradient(1200px 700px at 70% 20%, #13203A 0%, rgba(9,13,20,0) 60%), radial-gradient(900px 600px at 10% 100%, #0F2A22 0%, rgba(9,13,20,0) 60%), var(--bg)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(1100px 700px at 50% 45%,#000 30%,transparent 80%)}
+/* wipe stripes */
+.wipe{position:absolute;top:0;bottom:0;width:0;display:flex}
+.wipe i{display:block;width:26px;height:100%}
+/* subtitles */
+#sub{position:absolute;left:0;right:0;bottom:62px;display:flex;justify-content:center}
+#sub span{max-width:1500px;text-align:center;font:600 38px/1.32 Inter;color:#fff;padding:10px 22px;border-radius:10px;background:rgba(8,11,17,.62);box-shadow:0 6px 30px rgba(0,0,0,.25)}
+/* chapter label */
+#chap{left:72px;top:58px;display:flex;align-items:center;gap:14px;font:600 19px/1 Inter;letter-spacing:.16em;text-transform:uppercase;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.5)}
+#chap .n{font-family:"JetBrains Mono";color:var(--yellow);letter-spacing:0}
+#chap .ln{width:34px;height:2px;background:rgba(255,255,255,.7)}
+/* side shades for legibility over footage */
+.shadeL{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,9,14,.72) 0%,rgba(6,9,14,.45) 30%,rgba(6,9,14,0) 52%)}
+.shadeR{position:absolute;inset:0;background:linear-gradient(270deg,rgba(6,9,14,.72) 0%,rgba(6,9,14,.45) 30%,rgba(6,9,14,0) 52%)}
+/* browser */
+.browser{position:absolute;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 40px 120px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}
+.browser .bar{height:52px;background:#E9ECF1;display:flex;align-items:center;padding:0 18px;gap:9px}
+.browser .bar .d{width:13px;height:13px;border-radius:50%}
+.browser .url{margin-left:18px;flex:1;height:32px;border-radius:16px;background:#fff;display:flex;align-items:center;gap:10px;padding:0 16px;font:500 16px/1 Inter;color:#3C4043;white-space:nowrap;overflow:hidden}
+.browser .url svg{flex:none}
+.browser .vp{position:relative;overflow:hidden;background:#fff}
+.browser .vp img{display:block;position:absolute;left:0;top:0}
+.hl{position:absolute;overflow:hidden;border-radius:3px}
+.hl i{position:absolute;inset:-3px -4px;background:rgba(251,188,5,.42);mix-blend-mode:multiply;transform-origin:left center;transform:scaleX(0);display:block}
+/* cards */
+.card{position:absolute;background:var(--panel);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.card .top{height:5px}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);font:600 22px/1 Inter}
+.pill .d{width:10px;height:10px;border-radius:50%}
+</style></head>
+<body>
+
+<!-- ============ HOOK (over speaker) ============ -->
+<div id="hook" class="layer">
+  <div class="shadeL"></div>
+  <div class="abs" style="left:96px;top:300px;width:620px">
+    <div class="eyebrow" id="hookEy" style="color:#DDE3EA">Pelaburan Google di Malaysia</div>
+    <div class="disp" style="display:flex;align-items:baseline;margin-top:20px">
+      <span id="hookCur" style="font:700 72px/1 'Inter Tight';color:var(--yellow);margin-right:10px">US$</span>
+      <span id="hookNum" style="font:800 200px/0.9 'Inter Tight';letter-spacing:-.04em">15</span>
+    </div>
+    <div id="hookBil" class="disp" style="font:700 64px/1 'Inter Tight';letter-spacing:.02em;margin-top:6px">BILION</div>
+    <div id="hookBar" class="gbar" style="margin-top:28px;width:160px"><i></i><i></i><i></i><i></i></div>
+    <div id="hookMeta" style="margin-top:22px;font:500 26px/1.35 Inter;color:#DDE3EA">Tempoh pelaburan: 2027–2028</div>
+    <div id="hookSrc" class="src" style="margin-top:14px"><span class="dot"></span>Sumber: Google, siaran media 4 Nov 2026</div>
+  </div>
+</div>
+
+<!-- ============ QUESTION (over speaker) ============ -->
+<div id="question" class="layer">
+  <div class="shadeR"></div>
+  <div class="abs" style="right:96px;top:330px;text-align:right">
+    <div class="disp q1" style="font:800 92px/1 'Inter Tight'">KERJA</div>
+    <div class="disp q2" style="font:800 92px/1.05 'Inter Tight'">UNTUK</div>
+    <div class="disp q3" style="font:800 92px/1.05 'Inter Tight';color:var(--yellow)">RAKYAT?</div>
+    <div class="qline" style="height:6px;background:var(--yellow);margin-top:18px;margin-left:auto;transform-origin:right;width:360px"></div>
+  </div>
+</div>
+
+<!-- ============ TITLE (full screen) ============ -->
+<div id="title" class="layer fs">
+  <div class="grid"></div>
+  <div class="abs" style="left:0;right:0;top:300px;text-align:center">
+    <div class="eyebrow t1" style="font-size:26px;color:#C9D1DB">Pelaburan Google di Malaysia</div>
+    <div class="disp t2" style="font:800 190px/1 'Inter Tight';letter-spacing:-.045em;margin-top:26px">US$15 Bilion</div>
+    <div class="t3" style="display:flex;justify-content:center;margin-top:34px"><div class="gbar" style="width:260px;height:7px"><i></i><i></i><i></i><i></i></div></div>
+    <div class="serif t4" style="font-style:italic;font-size:64px;line-height:1.1;margin-top:34px;color:#E7ECF2">Kerja untuk rakyat kita — ada tak?</div>
+  </div>
+</div>
+
+<!-- ============ WEB1 (full screen) ============ -->
+<div id="web1" class="layer fs">
+  <div class="grid"></div>
+  <div class="abs w1head" style="left:120px;top:76px;display:flex;align-items:center;gap:18px">
+    <span class="pill"><span class="d" style="background:var(--green)"></span>Sumber rasmi</span>
+    <span style="font:500 24px/1 Inter;color:var(--muted)">Siaran media Google Cloud · 4 November 2026</span>
+  </div>
+  <div class="browser" id="b1" style="left:310px;top:170px;width:1300px">
+    <div class="bar"><span class="d" style="background:#FF5F57"></span><span class="d" style="background:#FEBC2E"></span><span class="d" style="background:#28C840"></span>
+      <div class="url"><svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="7" width="12" height="8" rx="2" fill="#5F6368"/><path d="M4 7V5a3 3 0 0 1 6 0v2" stroke="#5F6368" stroke-width="2" fill="none"/></svg>
+        <span><b style="color:#202124">googlecloudpresscorner.com</b>/2026-11-04-Google-Announces-Digital-Infrastructure-Expansion-…-US-15-Billion-Malaysia-Investment</span></div></div>
+    <div class="vp" id="vp1" style="height:600px"><div id="vp1in" class="abs" style="left:10px;top:0;width:1280px;height:660px;transform-origin:50% 55%"><img src="shots/headline.png" style="width:1280px"></div></div>
+  </div>
+</div>
+
+<!-- ============ MAP (full screen) ============ -->
+<div id="map" class="layer fs">
+  <div class="grid"></div>
+  <div id="mapWrap" class="abs" style="left:40px;top:0;width:1000px;height:1080px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 78%,transparent 100%)">
+    <svg id="mapSvg" class="abs" style="left:0;top:0" width="1000" height="1080"></svg>
+  </div>
+  <div class="abs" style="left:1060px;top:150px;width:780px">
+    <div class="eyebrow m0" style="color:#C9D1DB">Kampus pusat data Google</div>
+    <div class="m1" style="margin-top:22px;display:flex;flex-direction:column;gap:14px">
+      <div class="mrow" style="display:flex;align-items:center;gap:16px;font:500 26px/1.3 Inter"><span style="width:16px;height:16px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px rgba(52,168,83,.25)"></span>Elmina Business Park, Selangor — <b>beroperasi</b></div>
+      <div class="mrow" style="display:flex;align-items:center;gap:16px;font:500 26px/1.3 Inter"><span style="width:16px;height:16px;border-radius:50%;border:3px solid var(--blue)"></span>Kampus baharu dirancang — Selangor</div>
+      <div class="mrow" style="display:flex;align-items:center;gap:16px;font:500 26px/1.3 Inter"><span style="width:16px;height:16px;border-radius:50%;border:3px solid var(--blue)"></span>Kampus baharu dirancang — Negeri Sembilan</div>
+    </div>
+    <div style="margin-top:56px;display:flex;flex-direction:column;gap:6px">
+      <div class="disp kw" id="kw1" style="font:800 104px/1 'Inter Tight'"><span class="mono" style="font-size:28px;color:var(--blue);vertical-align:top;margin-right:18px">01</span>BINA</div>
+      <div class="disp kw" id="kw2" style="font:800 104px/1 'Inter Tight'"><span class="mono" style="font-size:28px;color:var(--red);vertical-align:top;margin-right:18px">02</span>JAGA</div>
+      <div class="disp kw" id="kw3" style="font:800 104px/1 'Inter Tight'"><span class="mono" style="font-size:28px;color:var(--yellow);vertical-align:top;margin-right:18px">03</span>URUS</div>
+    </div>
+    <div id="kw4" style="margin-top:30px;font:600 34px/1.2 Inter;color:var(--green)">→ semuanya perlukan tenaga kerja</div>
+  </div>
+  <div class="abs src msrc" style="left:120px;bottom:150px;width:900px"><span class="dot" style="background:var(--green)"></span><span>Sumber: Google, 4 Nov 2026. Kampus dirancang ditunjuk pada peringkat negeri. Peta: Natural Earth.</span></div>
+</div>
+
+<!-- ============ ROLES (over speaker) ============ -->
+<div id="roles" class="layer">
+  <div class="shadeL"></div>
+  <div class="abs" style="left:90px;top:250px;width:430px">
+    <div class="eyebrow r0" style="color:#DDE3EA">Tenaga kerja diperlukan</div>
+    <div style="margin-top:26px;display:flex;flex-direction:column;gap:16px" id="roleList"></div>
+  </div>
+</div>
+
+<!-- ============ JOBS (full screen) ============ -->
+<div id="jobs" class="layer fs">
+  <div class="grid"></div>
+  <div class="abs j0" style="left:120px;top:84px">
+    <div class="eyebrow" style="color:#C9D1DB">Jangkaan impak pekerjaan</div>
+    <div class="disp" style="font:700 54px/1.1 'Inter Tight';margin-top:16px">Pekerjaan tempatan yang disokong setiap tahun</div>
+  </div>
+  <div class="card jA" style="left:120px;top:300px;width:820px;height:478px">
+    <div class="top" style="background:var(--blue)"></div>
+    <div style="padding:40px 48px">
+      <div class="eyebrow" style="color:var(--blue)">Fasa pembinaan · 2027–2028</div>
+      <div class="disp" style="font:800 150px/1 'Inter Tight';letter-spacing:-.04em;margin-top:22px"><span id="n37">0</span><span style="color:var(--blue)">+</span></div>
+      <div style="font:500 30px/1.2 Inter;color:#DDE3EA;margin-top:6px">pekerjaan tempatan setahun</div>
+      <div style="margin-top:30px;height:14px;border-radius:7px;background:rgba(255,255,255,.08);overflow:hidden"><div id="barA" style="height:100%;width:100%;background:var(--blue);transform-origin:left;transform:scaleX(0)"></div></div>
+      <div class="jAs" style="margin-top:28px;display:flex;gap:44px;font:500 24px/1.35 Inter;color:var(--muted)">
+        <div><b class="disp" style="display:block;font:700 40px/1.1 'Inter Tight';color:#fff">≈ 6,000</b>dalam sektor pembinaan</div>
+        <div><b class="disp" style="display:block;font:700 40px/1.1 'Inter Tight';color:#fff">US$1.1 bilion</b>setahun kepada KDNK</div>
+      </div>
+    </div>
+  </div>
+  <div class="card jB" style="left:980px;top:300px;width:820px;height:478px">
+    <div class="top" style="background:var(--green)"></div>
+    <div style="padding:40px 48px">
+      <div class="eyebrow" style="color:var(--green)">Fasa operasi</div>
+      <div class="disp" style="font:800 150px/1 'Inter Tight';letter-spacing:-.04em;margin-top:22px"><span id="n9">0</span><span style="color:var(--green)">+</span></div>
+      <div style="font:500 30px/1.2 Inter;color:#DDE3EA;margin-top:6px">pekerjaan tempatan setahun</div>
+      <div style="margin-top:30px;height:14px;border-radius:7px;background:rgba(255,255,255,.08);overflow:hidden"><div id="barB" style="height:100%;width:24.3%;background:var(--green);transform-origin:left;transform:scaleX(0)"></div></div>
+      <div class="jBs" style="margin-top:28px;font:500 24px/1.35 Inter;color:var(--muted)">
+        <b class="disp" style="display:block;font:700 40px/1.1 'Inter Tight';color:#fff">Gaji purata 45% lebih tinggi</b>daripada median gaji nasional
+      </div>
+    </div>
+  </div>
+  <div class="abs src jsrc" style="left:120px;top:810px"><span class="dot"></span><span>Anggaran Google · Sumber: <b>googlecloudpresscorner.com</b> — siaran media 4 Nov 2026</span></div>
+</div>
+
+<!-- ============ WEB2 / ECOSYSTEM (full screen) ============ -->
+<div id="web2" class="layer fs">
+  <div class="grid"></div>
+  <div class="abs e0" style="left:120px;top:84px">
+    <div class="eyebrow" style="color:#C9D1DB">Ekosistem pekerjaan</div>
+    <div style="display:flex;gap:14px;margin-top:22px">
+      <span class="pill e1"><span class="d" style="background:var(--blue)"></span>Pakar di tapak pusat data</span>
+      <span class="pill e2"><span class="d" style="background:var(--yellow)"></span>Kontraktor &amp; pembekal tempatan</span>
+      <span class="pill e3"><span class="d" style="background:var(--green)"></span>Kedai, restoran &amp; kemudahan sekitar</span>
+    </div>
+  </div>
+  <div class="browser" id="b2" style="left:300px;top:260px;width:1320px">
+    <div class="bar"><span class="d" style="background:#FF5F57"></span><span class="d" style="background:#FEBC2E"></span><span class="d" style="background:#28C840"></span>
+      <div class="url"><svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="7" width="12" height="8" rx="2" fill="#5F6368"/><path d="M4 7V5a3 3 0 0 1 6 0v2" stroke="#5F6368" stroke-width="2" fill="none"/></svg>
+        <span><b style="color:#202124">googlecloudpresscorner.com</b>/2026-11-04-Google-Announces-…-US-15-Billion-Malaysia-Investment</span></div></div>
+    <div class="vp" style="height:470px;-webkit-mask-image:linear-gradient(#000 0,#000 100%)">
+      <div id="vp2in" class="abs" style="left:38px;top:-18px;width:922px;transform-origin:0 0">
+        <img src="shots/jobs.png" style="width:922px;position:relative">
+        <div id="hl2"></div>
+      </div>
+      <div class="abs" style="left:0;right:0;top:0;height:60px;background:linear-gradient(#fff,rgba(255,255,255,0))"></div>
+      <div class="abs" style="left:0;right:0;bottom:0;height:60px;background:linear-gradient(rgba(255,255,255,0),#fff)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ QUOTE (over speaker, speaker right) ============ -->
+<div id="quote" class="layer">
+  <div class="shadeL"></div>
+  <div class="abs" style="left:96px;top:290px;width:700px">
+    <div class="eyebrow qa" style="color:var(--yellow)">Ukuran kejayaan</div>
+    <div class="serif qb" style="font-size:86px;line-height:1.02;margin-top:22px">bukan berapa <span style="position:relative;display:inline-block">bilion<span id="strike" class="abs" style="left:-4px;right:-4px;top:52%;height:6px;background:var(--red);transform-origin:left;transform:scaleX(0)"></span></span></div>
+    <div class="serif qc" style="font-size:86px;line-height:1.02;font-style:italic;color:#DDE3EA">pelaburan diumumkan</div>
+  </div>
+</div>
+
+<!-- ============ DCI + SUPPLIERS (over speaker, speaker left) ============ -->
+<div id="dci" class="layer">
+  <div class="shadeR"></div>
+  <div class="card" style="left:1210px;top:250px;width:620px">
+    <div class="top" style="background:var(--green)"></div>
+    <div style="padding:34px 40px 36px">
+      <div class="eyebrow" style="color:var(--green)">Latihan TVET · mulai 2027</div>
+      <div class="disp" style="font:700 58px/1.05 'Inter Tight';margin-top:18px">Institut Pusat Data</div>
+      <div style="font:500 26px/1.4 Inter;color:#DDE3EA;margin-top:16px">Di politeknik terpilih di Selangor &amp; Negeri Sembilan — melatih dan menempatkan pencari kerja TVET untuk peranan pusat data.</div>
+      <div class="src" style="margin-top:22px"><span class="dot" style="background:var(--green)"></span>Sumber: Google, siaran media 4 Nov 2026</div>
+    </div>
+  </div>
+</div>
+<div id="suppliers" class="layer">
+  <div class="shadeR"></div>
+  <div class="card" style="left:1210px;top:220px;width:620px">
+    <div class="top" style="background:var(--blue)"></div>
+    <div style="padding:34px 40px 36px">
+      <div class="eyebrow" style="color:var(--blue)">Syarikat tempatan</div>
+      <div class="disp" style="display:flex;align-items:baseline;gap:18px;margin-top:14px"><span id="n80" style="font:800 140px/1 'Inter Tight';letter-spacing:-.04em">80+</span><span style="font:600 34px/1.1 Inter">entiti<br>Malaysia</span></div>
+      <div style="font:500 26px/1.4 Inter;color:#DDE3EA;margin-top:16px">dalam rantaian bekalan domestik Google — pembinaan, rangkaian, komponen kuasa &amp; penyejukan, logistik dan perkhidmatan.</div>
+      <div class="src" style="margin-top:22px"><span class="dot"></span>Sumber: Google, siaran media 4 Nov 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ END ============ -->
+<div id="end" class="layer fs">
+  <div class="grid"></div>
+  <div id="endQ" class="abs" style="left:200px;right:200px;top:210px">
+    <div class="eyebrow eq0" style="color:var(--yellow)">Ukuran kejayaan</div>
+    <div class="serif eq1" style="font-size:80px;line-height:1.1;margin-top:28px">“Berapa ramai rakyat Malaysia<br>dapat kerja yang bagus,</div>
+    <div class="serif eq2" style="font-size:80px;line-height:1.1;font-style:italic;color:#DDE3EA">dan berapa banyak syarikat tempatan<br>dapat peluang.”</div>
+    <div class="eq3" style="margin-top:44px"><div class="gbar" style="width:200px"><i></i><i></i><i></i><i></i></div></div>
+  </div>
+  <div id="endS" class="abs" style="left:200px;right:200px;top:220px;opacity:0">
+    <div class="eyebrow" style="color:#C9D1DB">Sumber &amp; rujukan</div>
+    <div style="margin-top:34px;display:flex;flex-direction:column;gap:30px;font:500 26px/1.45 Inter;color:#DDE3EA">
+      <div><b style="color:#fff">Google Cloud Press Corner</b> — “Google Announces Digital Infrastructure Expansion, Local Jobs, Water Replenishment, and Clean Energy Initiatives with US$15 Billion Malaysia Investment”, 4 Nov 2026<br><span class="mono" style="font-size:19px;color:var(--muted)">googlecloudpresscorner.com/2026-11-04-Google-Announces-Digital-Infrastructure-Expansion-Local-Jobs-Water-Replenishment-and-Clean-Energy-Initiatives-with-US-15-Billion-Malaysia-Investment</span></div>
+      <div><b style="color:#fff">Nota:</b> Angka pekerjaan, KDNK dan gaji ialah anggaran/unjuran Google bagi fasa pembinaan (2027–2028) dan operasi.</div>
+      <div><b style="color:#fff">Peta:</b> Natural Earth (domain awam). Lokasi kampus dirancang ditunjukkan pada peringkat negeri.</div>
+    </div>
+  </div>
+</div>
+
+<!-- chapter + subtitles + wipes + fade -->
+<div id="chap" class="abs" style="opacity:0"><span class="n" id="chapN">01</span><span class="ln"></span><span id="chapT"></span></div>
+<div id="sub"><span id="subT" style="opacity:0"></span></div>
+<div id="wipe" class="wipe"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></div>
+<div id="black" class="abs" style="inset:0;background:#000;opacity:0"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const p=(t,a,d)=>cl((t-a)/d);
+const o3=x=>1-Math.pow(1-x,3), o5=x=>1-Math.pow(1-x,5), io=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const ob=x=>{const c1=1.4,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+function vis(t,t0,t1,fi=.35,fo=.3){return Math.min(o3(p(t,t0,fi)),1-p(t,t1-fo,fo))}
+function rise(el,t,a,d=.6,dy=36){const k=o5(p(t,a,d));el.style.opacity=k;el.style.transform=`translateY(${(1-k)*dy}px)`;}
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+
+let D;
+function init(data){
+  D=data;
+  // map
+  const M=D.map, svg=$('#mapSvg');
+  svg.innerHTML=`<g id="mg">
+    <path d="${M.paths.Thailand}" fill="#121925" stroke="#263142" stroke-width="1.2"/>
+    <path d="${M.paths.Indonesia}" fill="#121925" stroke="#263142" stroke-width="1.2"/>
+    <path d="${M.paths.Singapore}" fill="#121925" stroke="#263142" stroke-width="1.2"/>
+    <path d="${M.paths.Malaysia}" fill="#1C2738" stroke="#4A5A72" stroke-width="1.6"/>
+    <g id="pins"></g></g>`;
+  const pins=$('#pins'); const P=M.pts;
+  const mk=(id,[x,y],col,filled,label,dx,dy)=>`<g id="${id}" opacity="0">
+      <circle class="pulse" cx="${x}" cy="${y}" r="10" fill="none" stroke="${col}" stroke-width="2"/>
+      <circle cx="${x}" cy="${y}" r="${filled?7:6}" fill="${filled?col:'#0B111B'}" stroke="${col}" stroke-width="${filled?0:3}"/>
+      <line x1="${x}" y1="${y}" x2="${x+dx}" y2="${y+dy}" stroke="rgba(255,255,255,.5)" stroke-width="1.2"/>
+      <text x="${x+dx+(dx<0?-8:8)}" y="${y+dy+5}" fill="#E8EDF3" font-family="Inter" font-weight="600" font-size="15" text-anchor="${dx<0?'end':'start'}">${label}</text></g>`;
+  pins.innerHTML = mk('pS',P.selangor,'#4285F4',false,'Selangor · dirancang',-70,-40)
+                 + mk('pE',P.elmina,'#34A853',true,'Elmina · beroperasi',-90,22)
+                 + mk('pN',P.ns,'#4285F4',false,'Negeri Sembilan · dirancang',-40,60)
+                 + `<g id="pK" opacity="0"><circle cx="${P.kl[0]}" cy="${P.kl[1]}" r="3" fill="#A3ACB9"/><text x="${P.kl[0]+8}" y="${P.kl[1]-6}" fill="#A3ACB9" font-family="Inter" font-size="12">Kuala Lumpur</text></g>`;
+  // roles
+  const roles=[['Jurutera','var(--blue)'],['Juruteknik','var(--red)'],['Kontraktor','var(--yellow)'],['Logistik','var(--green)']];
+  $('#roleList').innerHTML=roles.map(([r,c],i)=>`<div class="role" style="display:flex;align-items:center;gap:18px;padding:16px 22px;border-radius:14px;background:rgba(14,20,32,.72);border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(10px)">
+      <span class="mono" style="font-size:20px;color:${c}">0${i+1}</span><span class="disp" style="font:700 44px/1 'Inter Tight'">${r}</span></div>`).join('');
+  // highlights web1 & web2
+  const H=D.meta;
+  const mkHL=(rects,cls)=>rects.map(r=>`<div class="hl ${cls}" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px"><i></i></div>`).join('');
+  $('#vp1in').insertAdjacentHTML('beforeend', mkHL(H.headline.phrases['US$15 Billion Malaysia Investment'],'h1')+mkHL(H.headline.phrases['November 4, 2026'],'h1b'));
+  $('#hl2').innerHTML = mkHL(H.jobs.phrases['more than 9,000 local jobs per year'],'h2a')+mkHL(H.jobs.phrases['data center technicians, mechanical engineers, electrical engineers, logistics operations managers'],'h2b')+mkHL(H.jobs.phrases['contractor roles with local suppliers and workers at the shops, restaurants, and amenities patronized by these employees and their families'],'h2c');
+  $('#hl2').style.cssText='position:absolute;left:0;top:0';
+}
+function sweep(cls,t,a,d=.5){const els=$$('.'+cls+' i');els.forEach((e,i)=>{e.style.transform=`scaleX(${io(p(t,a+i*d*.85,d))})`;});}
+
+function render(t){
+  const E=D.ev, T=D.total;
+  // ---- HOOK
+  {const L=$('#hook'), e=E.hook; L.style.opacity=vis(t,e.t0,e.t1,.4,.35);
+   rise($('#hookEy'),t,e.t0,.6); rise($('#hookCur'),t,e.t0+.1,.6);
+   const k=o5(p(t,e.count_at-.25,.8)); $('#hookNum').textContent=Math.round(k*15); $('#hookNum').style.opacity=cl(p(t,e.t0+.05,.3));
+   rise($('#hookBil'),t,e.t0+.35,.6); $('#hookBar').style.transform=`scaleX(${o5(p(t,e.t0+.5,.7))})`; $('#hookBar').style.transformOrigin='left';
+   rise($('#hookMeta'),t,e.t0+.7,.6); rise($('#hookSrc'),t,e.t0+.9,.6);}
+  // ---- QUESTION
+  {const e=E.question; $('#question').style.opacity=vis(t,e.t0,e.t1,.3,.2);
+   ['.q1','.q2','.q3'].forEach((s,i)=>{const k=o5(p(t,e.t0+i*.28,.55)); const el=$('#question '+s); el.style.opacity=k; el.style.transform=`translateX(${(1-k)*60}px)`;});
+   $('#question .qline').style.transform=`scaleX(${o5(p(t,e.t0+1.0,.7))})`;}
+  // ---- TITLE
+  {const e=E.title; $('#title').style.opacity=t>=e.t0&&t<e.t1+.6?1:0;
+   const k=(a,d=.7)=>o5(p(t,e.t0+a,d));
+   const ttl=$('#title'); ttl.style.clipPath=`inset(0 0 0 ${(1-io(p(t,e.t0,.55)))*100}%)`;
+   const e1=$('#title .t1'); e1.style.opacity=k(.35); e1.style.letterSpacing=(0.18+0.12*(1-k(.35,1.2)))+'em';
+   const e2=$('#title .t2'); e2.style.opacity=k(.5); e2.style.transform=`scale(${1.08-0.08*k(.5,1.4)})`; e2.style.filter=`blur(${(1-k(.5,.6))*14}px)`;
+   $('#title .t3').style.transform=`scaleX(${k(.9,.8)})`;
+   rise($('#title .t4'),t,e.t0+1.2,.8,30);
+   $('#title .grid').style.transform=`scale(${1+0.05*p(t,e.t0,4)})`;}
+  // ---- WEB1
+  {const e=E.web1; $('#web1').style.opacity=t>=e.t0&&t<e.t1+.6?cl(p(t,e.t0,.45)):0;
+   rise($('#web1 .w1head'),t,e.t0+.15,.6,20);
+   const b=$('#b1'); const k=o5(p(t,e.t0,.9)); b.style.opacity=k;
+   b.style.transform=`translateY(${(1-k)*80}px) perspective(1600px) rotateX(${(1-k)*10}deg)`;
+   const z=io(p(t,e.t0+1.0,3.0)); $('#vp1in').style.transform=`scale(${1+0.07*z}) translateY(${-10*z}px)`;
+   sweep('h1',t,e.t0+1.3,.55); sweep('h1b',t,e.t0+2.4,.4);}
+  // ---- MAP
+  {const e=E.map; const on=t>=e.t0-.6&&t<e.t1+.01; const L=$('#map');
+   L.style.opacity=on?1:0;
+   L.style.clipPath=`inset(0 0 0 ${(1-io(p(t,e.t0-.5,.55)))*100}%)`;
+   if(t>e.t1-.35){L.style.opacity=1-p(t,e.t1-.35,.35);}
+   const z=io(p(t,e.t0-.4,3.6)); const P=D.map.pts.elmina; const s=1.05+0.85*z;
+   const cx=500, cy=540; const tx=cx-(P[0]+20)*s, ty=cy-(P[1]+10)*s;
+   const s0=0.98, tx0=(1000-D.map.W*s0)/2, ty0=(1080-D.map.H*s0)/2;
+   const S=s0+(s-s0)*z, TX=tx0+(tx-tx0)*z, TY=ty0+(ty-ty0)*z;
+   $('#mg').setAttribute('transform',`translate(${TX},${TY}) scale(${S})`);
+   [['#pE',.5],['#pS',.8],['#pN',1.05],['#pK',.6]].forEach(([id,a])=>{const g=$(id),k=o3(p(t,e.t0-.4+a+.6,.5)); g.setAttribute('opacity',k);
+     const pc=g.querySelector('.pulse'); if(pc){const ph=((t-e.t0)*0.9)%1; pc.setAttribute('r',8+ph*22); pc.setAttribute('opacity',(1-ph)*0.8*k);}});
+   $$('#map text').forEach(x=>x.setAttribute('font-size', 15/S*1.45));
+   rise($('#map .m0'),t,e.t0-.2,.6,20);
+   $$('#map .mrow').forEach((r,i)=>rise(r,t,e.t0+.1+i*.18,.6,20));
+   [['#kw1',e.bina],['#kw2',e.jaga],['#kw3',e.urus]].forEach(([id,a])=>{const k=o5(p(t,a-.12,.45)); const el=$(id); el.style.opacity=.15+.85*k; el.style.transform=`translateX(${(1-k)*40}px)`; el.style.color=k>0.01?'#fff':'#fff';});
+   rise($('#kw4'),t,e.tenaga,.5,16); rise($('#map .msrc'),t,e.t0+.4,.6,10);}
+  // ---- ROLES
+  {const e=E.roles; $('#roles').style.opacity=vis(t,e.t0-.15,e.t1,.35,.25);
+   rise($('#roles .r0'),t,e.t0-.1,.5,16);
+   $$('#roleList .role').forEach((r,i)=>{const k=ob(cl(p(t,e.k[i]-.1,.45))); const k2=cl(p(t,e.k[i]-.1,.25)); r.style.opacity=k2; r.style.transform=`translateX(${(1-k)*-60}px)`;});}
+  // ---- JOBS
+  {const e=E.jobs; const L=$('#jobs'); L.style.opacity=(t>=e.t0-.6&&t<e.t1+.01)?1:0;
+   L.style.clipPath=`inset(0 0 0 ${(1-io(p(t,e.t0-.5,.55)))*100}%)`;
+   if(t>e.t1-.3) L.style.opacity=1-p(t,e.t1-.3,.3);
+   rise($('#jobs .j0'),t,e.t0-.1,.6,20);
+   const ka=o5(p(t,e.t0+.15,.7)); const A=$('#jobs .jA'); A.style.opacity=ka; A.style.transform=`translateY(${(1-ka)*50}px)`;
+   const c37=o5(p(t,e.n37-.35,1.3)); $('#n37').textContent=fmt(37000*c37); $('#barA').style.transform=`scaleX(${c37})`;
+   rise($('#jobs .jAs'),t,e.pembinaan-.2,.6,16);
+   const kb=o5(p(t,e.n9-1.1,.7)); const B=$('#jobs .jB'); B.style.opacity=kb; B.style.transform=`translateY(${(1-kb)*50}px)`;
+   const c9=o5(p(t,e.n9-.3,1.2)); $('#n9').textContent=fmt(9000*c9); $('#barB').style.transform=`scaleX(${c9})`;
+   rise($('#jobs .jBs'),t,e.n9+.9,.6,16); rise($('#jobs .jsrc'),t,e.t0+.6,.6,10);}
+  // ---- WEB2
+  {const e=E.web2; const L=$('#web2'); L.style.opacity=(t>=e.t0&&t<e.t1+.01)?1:0;
+   if(t>e.t1-.3) L.style.opacity=1-p(t,e.t1-.3,.3);
+   $('#web2').style.clipPath='none';
+   rise($('#web2 .e0'),t,e.t0+.05,.5,16);
+   ['.e1','.e2','.e3'].forEach((s,i)=>{const k=o5(p(t,[e.t0+.3,e.hl-.05,e.hl+.55][i],.5)); const el=$('#web2 '+s); el.style.opacity=k; el.style.transform=`translateY(${(1-k)*16}px)`;});
+   const b=$('#b2'); const k=o5(p(t,e.t0,.8)); b.style.opacity=k; b.style.transform=`translateY(${(1-k)*70}px)`;
+   const z=io(p(t,e.t0+.2,4.6)); $('#vp2in').style.transform=`translate(${-40*z}px,${-112*z}px) scale(${1.36+0.08*z})`;
+   sweep('h2a',t,e.t0+.45,.45); sweep('h2b',t,e.t0+.9,.45); sweep('h2c',t,e.hl,.6);}
+  // ---- QUOTE
+  {const e=E.quote; $('#quote').style.opacity=vis(t,e.t0,e.t1,.35,.25);
+   rise($('#quote .qa'),t,e.t0,.6,16); rise($('#quote .qb'),t,e.bukan-.15,.7,26); rise($('#quote .qc'),t,e.bukan+1.6,.7,26);
+   $('#strike').style.transform=`scaleX(${io(p(t,e.bukan+2.4,.5))})`;}
+  // ---- DCI / SUPPLIERS
+  {const e=E.dci; $('#dci').style.opacity=vis(t,e.t0,e.t1,.4,.3); const k=o5(p(t,e.t0,.7)); $('#dci .card').style.transform=`translateX(${(1-k)*80}px)`;}
+  {const e=E.suppliers; $('#suppliers').style.opacity=vis(t,e.t0,e.t1+.01,.4,.25); const k=o5(p(t,e.t0,.7)); $('#suppliers .card').style.transform=`translateX(${(1-k)*80}px)`;
+   $('#n80').textContent=Math.round(80*o5(p(t,e.t0+.1,.9)))+'+';}
+  // ---- END
+  {const e=E.end; const L=$('#end'); L.style.opacity=cl(p(t,e.t0,.6));
+   rise($('#end .eq0'),t,e.t0+.3,.6,16); rise($('#end .eq1'),t,e.t0+.5,.9,26); rise($('#end .eq2'),t,e.t0+1.2,.9,26);
+   $('#end .eq3').style.transform=`scaleX(${o5(p(t,e.t0+1.8,.8))})`; $('#end .eq3').style.transformOrigin='left';
+   const sw=p(t,e.sources-.2,.6); $('#endQ').style.opacity=1-sw; $('#endS').style.opacity=cl(p(t,e.sources+.2,.6)); $('#endS').style.transform=`translateY(${(1-o5(p(t,e.sources+.2,.8)))*20}px)`;}
+  // ---- WIPE stripes (leading edge of reveals)
+  {const w=$('#wipe'); let shown=false;
+   for(const [a,d] of [[E.title.t0,.55],[E.map.t0-.5,.55],[E.jobs.t0-.5,.55]]){ if(t>=a&&t<a+d){ const x=(1-io(p(t,a,d)))*1920; w.style.left=(x-104)+'px'; w.style.width='104px'; shown=true; } }
+   w.style.opacity=shown?1:0;}
+  // ---- CHAPTER label (only over speaker)
+  {const ch=D.chapters.find(c=>t>=c.t0&&t<c.t1); const el=$('#chap');
+   if(ch){ el.style.opacity=vis(t,ch.t0,ch.t1,.4,.3); $('#chapN').textContent=ch.n; $('#chapT').textContent=ch.label; } else el.style.opacity=0;}
+  // ---- SUBTITLES
+  {const s=D.subs.find(s=>t>=s.t0-.04&&t<s.t1+.12); const el=$('#subT');
+   if(s && t<E.end.t0){ el.textContent=s.ms; el.style.opacity=Math.min(cl((t-s.t0+.04)/.12),cl((s.t1+.12-t)/.12)); } else el.style.opacity=0;}
+  // fade in / out
+  $('#black').style.opacity=Math.max(1-p(t,0,.4), p(t,T-.8,.8));
+}
+window.init=init; window.render=render;
+</script>
+</body></html>
