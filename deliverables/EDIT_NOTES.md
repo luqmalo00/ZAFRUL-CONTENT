@@ -41,11 +41,32 @@
 | 0:53.7–0:57.0 | Closing line | Close shot, subtitle only: "Itu yang kita kena pastikan." |
 | 0:57.0–1:05.4 | End | Closing quote in the speaker's own words → sources card → fade out |
 
+## Fast-paced version (`google-malaysia-us15b-explainer-fast.mp4`, 53.4 s)
+- **Same content, same order, same graphics and sources.** Only the pace changes.
+- **Pauses:** every pause of 0.25 s or longer is cut down to 0.15 s. Shorter pauses are left alone so no word is clipped, and the false start is removed as before.
+- **18 speaker shots instead of 7.** The framing punches in and out on alternate phrases, and consecutive shots always differ by at least 8% zoom so the cuts read as deliberate.
+- **Title:** a 1.4 s stinger after "…ada tak?", replacing the 3.4 s title card. The press-release shot now plays under "Bagus, ya." instead of in silence.
+- **Animations:** title, browser and end-card animations run about 2× faster.
+- **Music:** a 120 BPM version of the score with kick, clap and 16th-note hats. A light groove plays from the first frame and the full beat drops at the title.
+- **Subtitles:** `subtitles_fast_ms.srt` and `subtitles_fast_en.srt`.
+
+## Audio clarity pass (both versions)
+- **Noise:** the dialogue goes through the DeepFilterNet3 speech-enhancement model, with noise reduction capped at 24 dB so the voice still sounds natural. Background hum and room noise drop by about 22 dB, and the voice itself changes by about 1 dB.
+- **EQ for a chest-mounted lav:**
+  - double high-pass at 70–90 Hz
+  - −3 dB at 180 Hz and −3.5 dB at 380 Hz to remove boom and boxiness
+  - +5 dB at 3 kHz and +2 dB at 5.5 kHz for presence
+  - +3 dB high shelf at 8 kHz for air
+- **Dynamics:** de-esser, 3.5:1 compression and a limiter.
+- **Result:**
+  - The presence band (1–4 kHz) is now about 10 dB below the low-mids, compared with about 17 dB before.
+  - The music ducks about 15 dB under speech (previously about 11 dB), so it sits roughly 25 dB below the voice.
+
 ## Look and sound
 - **Grade:** gentle S-curve, slightly warm highlights, saturation +6%, soft vignette. Skin tones are kept natural.
 - **Typography:** Inter / Inter Tight (UI and numbers), Instrument Serif (quotes), JetBrains Mono (URLs).
 - **Colour:** dark navy surfaces, with Google's four brand colours used only as accents.
-- **Voice:** high-pass, light denoise, de-mud EQ, presence lift, 3:1 compression.
+- **Voice:** see "Audio clarity pass" above.
 - **Music:** an original score synthesised for this project (A-minor ambient pad, pluck arpeggio, sub). It is royalty-free with no licence risk. It ducks about 11 dB under speech and lifts in the title and end sections.
 - **Sound design:** riser and impact on the title, whooshes on graphic transitions, soft pops on data reveals.
 

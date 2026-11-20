@@ -1,13 +1,13 @@
 const { chromium } = require('playwright'); const fs=require('fs');
-const TL=JSON.parse(fs.readFileSync('timeline.json')); const map=JSON.parse(fs.readFileSync('map.json')); const meta=JSON.parse(fs.readFileSync('shots/meta.json'));
+const TL=JSON.parse(fs.readFileSync(process.env.TLF||'timeline.json')); const map=JSON.parse(fs.readFileSync('map.json')); const meta=JSON.parse(fs.readFileSync('shots/meta.json'));
 const seg=Object.fromEntries(TL.edl.map(e=>[e.id,e.out]));
-const chapters=[
+const chapters=TL.chapters?null:[
  {t0:seg.S1[0],t1:seg.S1[1],n:'01',label:'Pelaburan'},
  {t0:seg.S2[0],t1:TL.ev.map.t0-0.5,n:'02',label:'Tenaga kerja'},
  {t0:seg.S3[0],t1:TL.ev.jobs.t0-0.5,n:'03',label:'Unjuran pekerjaan'},
  {t0:seg.S5[0],t1:seg.S7[1],n:'04',label:'Ukuran kejayaan'},
 ];
-const data={...TL,map,meta,chapters};
+const data={...TL,map,meta,chapters:TL.chapters||chapters};
 (async()=>{
   const mode=process.argv[2]; const out=process.argv[3];
   fs.mkdirSync(out,{recursive:true});

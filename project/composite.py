@@ -4,7 +4,8 @@ import sys, json, subprocess, numpy as np, cv2, os
 
 W = '/tmp/claude-0/work/'
 SRC = '/tmp/claude-0/raw/C0019.MP4'
-TL = json.load(open(W + 'timeline.json'))
+TL = json.load(open(os.environ.get('TLF', W + 'timeline.json')))
+MIX = os.environ.get('MIX', W + 'mix.wav')
 FPS = TL['fps']; OW, OH = 1920, 1080
 
 # --- grade: gentle S-curve, slight warmth in highlights, +6% saturation, soft vignette
@@ -81,7 +82,7 @@ if sys.argv[1] == 'test':
 frames_dir, out = sys.argv[2], sys.argv[3]
 n = int(round(TL['total'] * FPS))
 enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{OW}x{OH}', '-r', str(FPS), '-i', '-',
-                        '-i', W + 'mix.wav', '-map', '0:v', '-map', '1:a',
+                        '-i', MIX, '-map', '0:v', '-map', '1:a',
                         '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-profile:v', 'high',
                         '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709',
                         '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', '-shortest', out], stdin=subprocess.PIPE)

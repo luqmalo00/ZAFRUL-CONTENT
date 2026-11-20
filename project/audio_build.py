@@ -4,13 +4,24 @@ from scipy.signal import butter, sosfilt, fftconvolve
 
 SR = 48000
 W = '/tmp/claude-0/work/'
-TL = json.load(open(W + 'timeline.json'))
+import sys
+TL = json.load(open(sys.argv[1] if len(sys.argv) > 1 else W + 'timeline.json'))
+OUT = sys.argv[2] if len(sys.argv) > 2 else ''
+FAST = TL.get('style') == 'fast'
 N = int(round(TL['total'] * SR))
 rng = np.random.default_rng(7)
 
 # ---------- VOICE ----------
-raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', '/tmp/claude-0/raw/C0019.MP4', '-vn',
-                      '-af', 'pan=mono|c0=0.5*c0+0.5*c1', '-ar', str(SR), '-f', 'f32le', '-'],
+# Source: DeepFilterNet3-enhanced dialogue (noise reduction capped at 24 dB for a natural sound),
+# then corrective EQ for a chest-mounted lav: remove rumble/boom, reduce boxiness, restore presence & air.
+VOICE_CHAIN = ('highpass=f=90:poles=2,highpass=f=70:poles=2,'
+               'equalizer=f=180:t=q:w=1.0:g=-3,equalizer=f=380:t=q:w=1.4:g=-3.5,'
+               'equalizer=f=3000:t=q:w=1.6:g=5,equalizer=f=5500:t=q:w=1.2:g=2,highshelf=f=8000:g=3,'
+               'deesser=i=0.35:m=0.5:f=0.5,'
+               'acompressor=threshold=-22dB:ratio=3.5:attack=5:release=100:makeup=3,'
+               'alimiter=limit=0.89:attack=3:release=50')
+raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', W + 'dfout/src48_df24.wav',
+                      '-af', VOICE_CHAIN, '-ar', str(SR), '-ac', '1', '-f', 'f32le', '-'],
                      capture_output=True, check=True).stdout
 src = np.frombuffer(raw, np.float32).copy()
 voice = np.zeros(N, np.float32)
@@ -23,14 +34,12 @@ for e in TL['edl']:
     seg[:F] *= ramp; seg[-F:] *= ramp[::-1]
     o = int(round(e['out'][0] * SR))
     voice[o:o + len(seg)] += seg[:N - o]
-voice.tofile(W + 'voice_raw.f32')
+voice.tofile(W + OUT + 'voice_raw.f32')
 # clean: highpass, gentle denoise, de-mud EQ, presence, compression, normalise
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '1', '-i', W + 'voice_raw.f32',
-                '-af', 'highpass=f=85,afftdn=nf=-32:nr=10,equalizer=f=250:t=q:w=1.2:g=-2,'
-                       'equalizer=f=3500:t=q:w=1.0:g=2,acompressor=threshold=-20dB:ratio=3:attack=8:release=120:makeup=2,'
-                       'loudnorm=I=-17:TP=-2:LRA=7',
-                '-ar', str(SR), '-f', 'f32le', W + 'voice_clean.f32'], check=True)
-voice = np.fromfile(W + 'voice_clean.f32', np.float32)[:N]
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '1', '-i', W + OUT + 'voice_raw.f32',
+                '-af', 'loudnorm=I=-16:TP=-1.5:LRA=6',
+                '-ar', str(SR), '-f', 'f32le', W + OUT + 'voice_clean.f32'], check=True)
+voice = np.fromfile(W + OUT + 'voice_clean.f32', np.float32)[:N]
 voice = np.pad(voice, (0, N - len(voice)))
 
 # ---------- MUSIC ----------
@@ -57,7 +66,7 @@ def pad_voice(freq, n, bright=10):
             y += (np.sin(2 * np.pi * f * k * t + ph * k) / k ** 1.25).astype(np.float32)
     return y / 3
 
-BPM = 90; BEAT = 60 / BPM; BAR = 4 * BEAT
+BPM = TL.get('bpm', 90); BEAT = 60 / BPM; BAR = 4 * BEAT
 # A minor progression, two bars each: Am9, Fmaj7, C(add9)/E, G6sus
 CHORDS = [[57, 60, 64, 67, 71], [53, 57, 60, 64, 69], [52, 55, 60, 62, 67], [55, 59, 62, 64, 69]]
 ROOTS = [45, 41, 40, 43]
@@ -77,14 +86,15 @@ while t0 < TL['total']:
     bass[a:a + n] += (np.sin(2 * np.pi * hz(root - 12 + 12) * tb) * env_adsr(n, 0.4, 1.2) * 0.10).astype(np.float32)
     # 8th-note pluck arpeggio
     pattern = [0, 2, 1, 3, 4, 3, 1, 2]
-    for s in range(16):
-        ts = t0 + s * BEAT / 2
+    DIV = 4 if FAST else 2
+    for s in range(8 * DIV):
+        ts = t0 + s * BEAT / DIV
         if ts >= TL['total']: break
         m = ch[pattern[s % 8]] + 12
         k = int(ts * SR); L = min(int(0.9 * SR), N - k); tt = np.arange(L) / SR
         f = hz(m)
         note = (np.sin(2 * np.pi * f * tt) + 0.35 * np.sin(2 * np.pi * 2 * f * tt) + 0.12 * np.sin(2 * np.pi * 3 * f * tt))
-        note *= np.exp(-tt * 5.5) * np.minimum(1, tt / 0.004)
+        note *= np.exp(-tt * (9.0 if FAST else 5.5)) * np.minimum(1, tt / 0.004)
         vel = 0.05 * (1.0 if s % 2 == 0 else 0.7)
         pan = 0.5 + 0.35 * np.sin(s * 0.9)
         arp[k:k + L] += (note * vel * (1 - pan)).astype(np.float32); arpR[k:k + L] += (note * vel * pan).astype(np.float32)
@@ -106,14 +116,39 @@ def ramp_curve(points):
     xs = [p[0] for p in points]; ys = [p[1] for p in points]
     return np.interp(t_all, xs, ys).astype(np.float32)
 T = TL['total']
-arp_gain = ramp_curve([(0, 0.0), (7.3, 0.0), (7.7, 1.0), (15.0, 1.0), (15.6, 0.55), (56.8, 0.55), (57.2, 0.9), (T - 3.2, 0.7), (T, 0)])
-pad_gain = ramp_curve([(0, 0.0), (0.6, 0.7), (7.4, 0.8), (7.7, 1.0), (15.2, 1.0), (16.0, 0.8), (57.0, 0.85), (57.4, 1.0), (T - 3.5, 1.0), (T, 0)])
-bass_gain = ramp_curve([(0, 0), (7.6, 0), (7.7, 1), (T - 3, 1), (T, 0)])
+AU = TL.get('auto', {})
+arp_gain = ramp_curve(AU.get('arp', [(0, 0.0), (7.3, 0.0), (7.7, 1.0), (15.0, 1.0), (15.6, 0.55), (56.8, 0.55), (57.2, 0.9), (T - 3.2, 0.7), (T, 0)]))
+pad_gain = ramp_curve(AU.get('pad', [(0, 0.0), (0.6, 0.7), (7.4, 0.8), (7.7, 1.0), (15.2, 1.0), (16.0, 0.8), (57.0, 0.85), (57.4, 1.0), (T - 3.5, 1.0), (T, 0)]))
+bass_gain = ramp_curve(AU.get('bass', [(0, 0), (7.6, 0), (7.7, 1), (T - 3, 1), (T, 0)]))
 
 mL = padL * pad_gain + arp * arp_gain + bass * bass_gain
 mR = padR * pad_gain + arpR * arp_gain + bass * bass_gain
 wetL = verb(padL * pad_gain + arp * arp_gain, irL); wetR = verb(padR * pad_gain + arpR * arp_gain, irR)
 mL = mL + wetL * 0.9; mR = mR + wetR * 0.9
+
+# ---------- DRUMS (fast style only) ----------
+if FAST:
+    drum = np.zeros(N, np.float32); hatL = np.zeros(N, np.float32); hatR = np.zeros(N, np.float32)
+    def put(buf, x, t):
+        k = int(t * SR); L = min(len(x), N - k)
+        if L > 0: buf[k:k + L] += x[:L]
+    nk = int(0.35 * SR); tk = np.arange(nk) / SR
+    kick = (np.sin(2 * np.pi * np.cumsum(45 + 110 * np.exp(-tk * 30)) / SR) * np.exp(-tk * 9)).astype(np.float32) * 0.42
+    ncl = int(0.22 * SR); tcl = np.arange(ncl) / SR
+    clap = (bp(rng.standard_normal(ncl).astype(np.float32), 900, 4500) * np.exp(-tcl * 22)).astype(np.float32) * 0.30
+    nh = int(0.05 * SR); th = np.arange(nh) / SR
+    hat = (hp(rng.standard_normal(nh).astype(np.float32), 7000) * np.exp(-th * 80)).astype(np.float32) * 0.10
+    bt = 0.0; i = 0
+    while bt < T:
+        put(drum, kick, bt)
+        if i % 2 == 1: put(drum, clap, bt)
+        for q in range(4):
+            v = 1.0 if q == 2 else 0.55
+            put(hatL if q % 2 else hatR, hat * v, bt + q * BEAT / 4)
+        bt += BEAT; i += 1
+    drum_gain = ramp_curve(AU.get('drums', [(0, 1), (T, 1)]))
+    dw = verb(drum * 0.3, irL) * 0.25
+    mL = mL + (drum + hatL) * drum_gain + dw * drum_gain; mR = mR + (drum + hatR) * drum_gain + dw * drum_gain
 
 # ---------- SFX ----------
 sfxL = np.zeros(N, np.float32); sfxR = np.zeros(N, np.float32)
@@ -184,17 +219,17 @@ a_c, r_c = np.exp(-1 / (0.06 * SR)), np.exp(-1 / (0.6 * SR))
 for i in range(0, N, 48):  # control-rate smoothing
     tgt = active[i]; coef = a_c ** 48 if tgt > g else r_c ** 48
     g = tgt + (g - tgt) * coef; sm[i:i + 48] = g
-duck = (1.0 - 0.72 * sm).astype(np.float32)
-boost = ramp_curve([(0, 1), (7.5, 1), (7.7, 2.0), (15.0, 2.0), (15.4, 1), (56.9, 1), (57.3, 2.0), (T, 2.0)])
+duck = (1.0 - 0.83 * sm).astype(np.float32)  # ~ -15 dB under speech
+boost = ramp_curve(AU.get('boost', [(0, 1), (7.5, 1), (7.7, 2.0), (15.0, 2.0), (15.4, 1), (56.9, 1), (57.3, 2.0), (T, 2.0)]))
 duck = duck * boost
 MUS = 0.55
 L = voice + (mL * duck) * MUS + sfxL
 R = voice + (mR * duck) * MUS + sfxR
 mix = np.stack([L, R], 1)
 mix /= max(1.0, np.abs(mix).max() / 0.95)
-mix.astype(np.float32).tofile(W + 'mix.f32')
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', W + 'mix.f32',
-                '-af', 'loudnorm=I=-16:TP=-1.5:LRA=9', '-ar', str(SR), '-c:a', 'pcm_s16le', W + 'mix.wav'], check=True)
+mix.astype(np.float32).tofile(W + OUT + 'mix.f32')
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', W + OUT + 'mix.f32',
+                '-af', 'loudnorm=I=-16:TP=-1.5:LRA=9', '-ar', str(SR), '-c:a', 'pcm_s16le', W + OUT + 'mix.wav'], check=True)
 # stems for the editor
-np.stack([mL * duck * MUS, mR * duck * MUS], 1).astype(np.float32).tofile(W + 'music.f32')
+np.stack([mL * duck * MUS, mR * duck * MUS], 1).astype(np.float32).tofile(W + OUT + 'music.f32')
 print('done', N / SR)

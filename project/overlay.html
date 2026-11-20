@@ -309,7 +309,8 @@ function init(data){
 function sweep(cls,t,a,d=.5){const els=$$('.'+cls+' i');els.forEach((e,i)=>{e.style.transform=`scaleX(${io(p(t,a+i*d*.85,d))})`;});}
 
 function render(t){
-  const E=D.ev, T=D.total;
+  const E=D.ev, T=D.total, WP=D.warp||{}, TA=D.tail||{title:.6,web1:.6};
+  const warp=(key,t)=>E[key].t0+(t-E[key].t0)*(WP[key]||1);
   // ---- HOOK
   {const L=$('#hook'), e=E.hook; L.style.opacity=vis(t,e.t0,e.t1,.4,.35);
    rise($('#hookEy'),t,e.t0,.6); rise($('#hookCur'),t,e.t0+.1,.6);
@@ -321,21 +322,23 @@ function render(t){
    ['.q1','.q2','.q3'].forEach((s,i)=>{const k=o5(p(t,e.t0+i*.28,.55)); const el=$('#question '+s); el.style.opacity=k; el.style.transform=`translateX(${(1-k)*60}px)`;});
    $('#question .qline').style.transform=`scaleX(${o5(p(t,e.t0+1.0,.7))})`;}
   // ---- TITLE
-  {const e=E.title; $('#title').style.opacity=t>=e.t0&&t<e.t1+.6?1:0;
+  {const e=E.title; $('#title').style.opacity=t>=e.t0&&t<e.t1+TA.title?(TA.title>0?1:1-p(t,e.t1-.12,.12)):0;
+   const t_=t; {const t=warp('title',t_);
    const k=(a,d=.7)=>o5(p(t,e.t0+a,d));
    const ttl=$('#title'); ttl.style.clipPath=`inset(0 0 0 ${(1-io(p(t,e.t0,.55)))*100}%)`;
    const e1=$('#title .t1'); e1.style.opacity=k(.35); e1.style.letterSpacing=(0.18+0.12*(1-k(.35,1.2)))+'em';
    const e2=$('#title .t2'); e2.style.opacity=k(.5); e2.style.transform=`scale(${1.08-0.08*k(.5,1.4)})`; e2.style.filter=`blur(${(1-k(.5,.6))*14}px)`;
    $('#title .t3').style.transform=`scaleX(${k(.9,.8)})`;
    rise($('#title .t4'),t,e.t0+1.2,.8,30);
-   $('#title .grid').style.transform=`scale(${1+0.05*p(t,e.t0,4)})`;}
+   $('#title .grid').style.transform=`scale(${1+0.05*p(t,e.t0,4)})`;}}
   // ---- WEB1
-  {const e=E.web1; $('#web1').style.opacity=t>=e.t0&&t<e.t1+.6?cl(p(t,e.t0,.45)):0;
+  {const e=E.web1; $('#web1').style.opacity=t>=e.t0&&t<e.t1+TA.web1?Math.min(cl(p(warp('web1',t),e.t0,.45)),TA.web1>0?1:1-p(t,e.t1-.12,.12)):0;
+   const t_=t; {const t=warp('web1',t_);
    rise($('#web1 .w1head'),t,e.t0+.15,.6,20);
    const b=$('#b1'); const k=o5(p(t,e.t0,.9)); b.style.opacity=k;
    b.style.transform=`translateY(${(1-k)*80}px) perspective(1600px) rotateX(${(1-k)*10}deg)`;
    const z=io(p(t,e.t0+1.0,3.0)); $('#vp1in').style.transform=`scale(${1+0.07*z}) translateY(${-10*z}px)`;
-   sweep('h1',t,e.t0+1.3,.55); sweep('h1b',t,e.t0+2.4,.4);}
+   sweep('h1',t,e.t0+1.3,.55); sweep('h1b',t,e.t0+2.4,.4);}}
   // ---- MAP
   {const e=E.map; const on=t>=e.t0-.6&&t<e.t1+.01; const L=$('#map');
    L.style.opacity=on?1:0;
@@ -386,9 +389,10 @@ function render(t){
   {const e=E.suppliers; $('#suppliers').style.opacity=vis(t,e.t0,e.t1+.01,.4,.25); const k=o5(p(t,e.t0,.7)); $('#suppliers .card').style.transform=`translateX(${(1-k)*80}px)`;
    $('#n80').textContent=Math.round(80*o5(p(t,e.t0+.1,.9)))+'+';}
   // ---- END
-  {const e=E.end; const L=$('#end'); L.style.opacity=cl(p(t,e.t0,.6));
+  {const e=E.end; const L=$('#end'); L.style.opacity=cl(p(t,e.t0,.6/(WP.end||1)));
+   const t_=t; {const t=warp('end',t_);
    rise($('#end .eq0'),t,e.t0+.3,.6,16); rise($('#end .eq1'),t,e.t0+.5,.9,26); rise($('#end .eq2'),t,e.t0+1.2,.9,26);
-   $('#end .eq3').style.transform=`scaleX(${o5(p(t,e.t0+1.8,.8))})`; $('#end .eq3').style.transformOrigin='left';
+   $('#end .eq3').style.transform=`scaleX(${o5(p(t,e.t0+1.8,.8))})`; $('#end .eq3').style.transformOrigin='left';}
    const sw=p(t,e.sources-.2,.6); $('#endQ').style.opacity=1-sw; $('#endS').style.opacity=cl(p(t,e.sources+.2,.6)); $('#endS').style.transform=`translateY(${(1-o5(p(t,e.sources+.2,.8)))*20}px)`;}
   // ---- WIPE stripes (leading edge of reveals)
   {const w=$('#wipe'); let shown=false;
