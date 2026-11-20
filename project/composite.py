@@ -7,6 +7,8 @@ SRC = '/tmp/claude-0/raw/C0019.MP4'
 TL = json.load(open(os.environ.get('TLF', W + 'timeline.json')))
 MIX = os.environ.get('MIX', W + 'mix.wav')
 FPS = TL['fps']; OW, OH = 1920, 1080
+PORTRAIT = os.environ.get('ORIENT') == 'portrait'
+PW, PH, PVH = 1080, 1920, 1220   # portrait canvas and speaker-area height
 
 # --- grade: gentle S-curve, slight warmth in highlights, +6% saturation, soft vignette
 x = np.arange(256) / 255.0
@@ -62,10 +64,27 @@ def grab(src_t):
                           '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], capture_output=True, check=True).stdout
     return np.frombuffer(raw, np.uint8).reshape(OH, OW, 3)
 
+def reframe_portrait(rgb, zoom, cy):
+    zp = min(1.30, zoom)
+    h = OH / zp; w = h * PW / PVH
+    cx = min(max(985, w / 2), OW - w / 2); cy = min(max(cy, h / 2), OH - h / 2)
+    x0, y0 = cx - w / 2, cy - h / 2
+    M = np.float32([[PW / w, 0, -x0 * PW / w], [0, PVH / h, -y0 * PVH / h]])
+    out = cv2.warpAffine(rgb, M, (PW, PVH), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REFLECT)
+    if PW / w > 1.2:
+        bl = cv2.GaussianBlur(out, (0, 0), 1.2); out = cv2.addWeighted(out, 1.3, bl, -0.3, 0)
+    canvas = np.zeros((PH, PW, 3), np.float32); canvas[:PVH] = out
+    return canvas
+
+def blank():
+    return np.zeros((PH, PW, 3), np.float32) if PORTRAIT else np.zeros((OH, OW, 3), np.float32)
+
 def base_frame(t, rgb):
     e = seg_at(t)
     if e['kind'] != 'a':
-        return np.zeros((OH, OW, 3), np.float32)
+        return blank()
+    if PORTRAIT:
+        return reframe_portrait(grade(rgb), zoom_at(e, t), e['cy'])
     return reframe(grade(rgb), zoom_at(e, t), e['cx'], e['cy'])
 
 if sys.argv[1] == 'test':
@@ -73,7 +92,7 @@ if sys.argv[1] == 'test':
     for ts in sys.argv[3:]:
         t = float(ts); e = seg_at(t)
         rgb = grab(e['src'][0] + t - e['out'][0]) if e['kind'] == 'a' else None
-        b = base_frame(t, rgb) if rgb is not None else np.zeros((OH, OW, 3), np.float32)
+        b = base_frame(t, rgb) if rgb is not None else blank()
         img = over(b, f'{d}/t_{t:.2f}.png')
         cv2.imwrite(f'{d}/c_{t:.2f}.jpg', cv2.cvtColor(np.clip(img, 0, 255).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 88])
     sys.exit()
@@ -81,7 +100,7 @@ if sys.argv[1] == 'test':
 # ---- full render
 frames_dir, out = sys.argv[2], sys.argv[3]
 n = int(round(TL['total'] * FPS))
-enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{OW}x{OH}', '-r', str(FPS), '-i', '-',
+enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', (f'{PW}x{PH}' if PORTRAIT else f'{OW}x{OH}'), '-r', str(FPS), '-i', '-',
                         '-i', MIX, '-map', '0:v', '-map', '1:a',
                         '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-profile:v', 'high',
                         '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709',
@@ -102,7 +121,7 @@ for e in TL['edl']:
                 rgb = np.frombuffer(buf, np.uint8).reshape(OH, OW, 3); last = rgb
             b = base_frame(t, rgb)
         else:
-            b = np.zeros((OH, OW, 3), np.float32)
+            b = blank()
         img = over(b, f'{frames_dir}/f_{fi:05d}.png')
         enc.stdin.write(np.clip(img + 0.5, 0, 255).astype(np.uint8).tobytes())
         fi += 1

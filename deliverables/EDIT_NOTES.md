@@ -50,6 +50,12 @@
 - **Music:** a 120 BPM version of the score with kick, clap and 16th-note hats. A light groove plays from the first frame and the full beat drops at the title.
 - **Subtitles:** `subtitles_fast_ms.srt` and `subtitles_fast_en.srt`.
 
+## Portrait version (`google-malaysia-us15b-explainer-fast-portrait.mp4`, 1080×1920, 53.4 s)
+- **Edit:** the same as the fast-paced cut, with the same audio and subtitles (`subtitles_fast_*.srt`).
+- **Stacked layout:** the speaker fills the top 1220 px at about 1.13–1.3× scale, so it stays close to native resolution. A full-bleed 9:16 crop would have needed about 1.78× upscaling.
+- **Bottom panel:** carries the chapter label, the panel graphics (US$15B counter, "KERJA UNTUK RAKYAT?", role chips, the quote, and the TVET and supplier cards) and large subtitles.
+- **Full-screen graphics:** title, press release, map, job numbers, ecosystem, end card and sources are re-laid out vertically.
+
 ## Audio clarity pass (both versions)
 - **Noise:** the dialogue goes through the DeepFilterNet3 speech-enhancement model, with noise reduction capped at 24 dB so the voice still sounds natural. Background hum and room noise drop by about 22 dB, and the voice itself changes by about 1 dB.
 - **EQ for a chest-mounted lav:**

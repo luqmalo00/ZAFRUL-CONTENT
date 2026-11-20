@@ -11,8 +11,8 @@ const data={...TL,map,meta,chapters:TL.chapters||chapters};
 (async()=>{
   const mode=process.argv[2]; const out=process.argv[3];
   fs.mkdirSync(out,{recursive:true});
-  const b=await chromium.launch(); const p=await b.newPage({viewport:{width:1920,height:1080},deviceScaleFactor:1});
-  await p.goto('file://'+__dirname+'/overlay.html',{waitUntil:'networkidle'});
+  const b=await chromium.launch(); const p=await b.newPage({viewport:{width:+(process.env.VW||1920),height:+(process.env.VH||1080)},deviceScaleFactor:1});
+  await p.goto('file://'+__dirname+'/'+(process.env.PAGE||'overlay.html'),{waitUntil:'networkidle'});
   await p.evaluate(async d=>{await document.fonts.ready; init(d);}, data);
   await p.waitForTimeout(500);
   let times;
